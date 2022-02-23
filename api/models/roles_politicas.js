@@ -14,7 +14,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   roles_politicas.init({
-    id: DataTypes.INTEGER,
     rol_id: DataTypes.INTEGER,
     politica_id: DataTypes.INTEGER
   }, {

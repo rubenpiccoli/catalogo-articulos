@@ -1,21 +1,15 @@
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('roles_politicas', {
+    await queryInterface.createTable('roles', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      id: {
-        type: Sequelize.INTEGER
-      },
-      rol_id: {
-        type: Sequelize.INTEGER
-      },
-      politica_id: {
-        type: Sequelize.INTEGER
+      rol: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -28,6 +22,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('roles_politicas');
+    await queryInterface.dropTable('roles');
   }
 };

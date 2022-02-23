@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const usuarios = require('./usuarios');
 module.exports = (sequelize, DataTypes) => {
   class roles extends Model {
     /**
@@ -11,11 +12,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+     
+     roles.hasMany(models.usuarios,{as: "roles", foreignKey:"rol_id" });
+    roles.belongsToMany(models.politicas, {through:"roles_politicas",uniqueKey: 'id'});
+    
     }
   }
   roles.init({
-    id: DataTypes.INTEGER,
-    rol: DataTypes.STRING
+    rol: DataTypes.STRING,
+   
   }, {
     sequelize,
     modelName: 'roles',

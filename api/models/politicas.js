@@ -10,11 +10,12 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      /* muchos a muchos*/
+      politicas.belongsToMany(models.roles, {through:"roles_politicas, uniqueKey: 'id'"})
+     
     }
   }
   politicas.init({
-    id: DataTypes.INTEGER,
     politicas: DataTypes.STRING
   }, {
     sequelize,
