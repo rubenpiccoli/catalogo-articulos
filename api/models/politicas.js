@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       /* muchos a muchos*/
-      politicas.belongsToMany(models.roles, {through:"roles_politicas, uniqueKey: 'id'"})
+      politicas.belongsToMany(models.roles, {through:"roles_politicas",foreignKey:"politica_id"})
      
     }
   }
@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     politicas: DataTypes.STRING
   }, {
     sequelize,
+   
     modelName: 'politicas',
   });
   return politicas;

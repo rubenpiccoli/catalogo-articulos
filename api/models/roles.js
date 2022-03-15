@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const roles_politicas = require('./roles_politicas');
 const usuarios = require('./usuarios');
 module.exports = (sequelize, DataTypes) => {
   class roles extends Model {
@@ -13,16 +14,32 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
      
-     roles.hasMany(models.usuarios,{as: "roles", foreignKey:"rol_id" });
-    roles.belongsToMany(models.politicas, {through:"roles_politicas",uniqueKey: 'id'});
+    roles.hasMany(models.usuarios,{as: "roles", foreignKey:"rol_id" });
+    roles.belongsToMany(models.politicas, {through:"roles_politicas", foreignKey:"rol_id"});
     
     }
   }
   roles.init({
-    rol: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+      references: {
+        model: roles_politicas, 
+        foreignKey: 'rol_id'
+      }
+    },
+    
+    rol:{
+      type: DataTypes.STRING,
+      allowNull: false,
+      /*Unique: true*/
+    },
    
   }, {
     sequelize,
+   
     modelName: 'roles',
   });
   return roles;
