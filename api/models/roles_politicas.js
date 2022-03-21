@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     politica_id: DataTypes.INTEGER
   }, {
     sequelize,
+   
     modelName: 'roles_politicas',
   });
   return roles_politicas;

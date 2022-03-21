@@ -2,7 +2,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const sequelize = require('./conection');
+//const sequelize = require('./conection');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -11,13 +11,13 @@ var roles = require('./routes/roles');
 var politicas = require('./routes/politicas');
 
 var app = express();
-sequelize.sync()
+/*sequelize.sync()
 .then(()=>{
     console.log('conexion exitosa')
 })
 .catch(error =>{
     console.log('error de conexion es'+error)
-});
+});*/
 
 
 app.use(logger('dev'));

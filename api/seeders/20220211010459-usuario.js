@@ -7,8 +7,10 @@ module.exports = {
         cuenta: 'facebook',
         nombre: 'Dario',
         pass: 1234,
-        rol_id:1,
-       
+        rol_id:9,
+        createdAt: new Date(),
+        updatedAt: new Date()
+
       }]);
     },
     down: (queryInterface, Sequelize) => {

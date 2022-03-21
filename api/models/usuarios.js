@@ -38,14 +38,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false,
     validate:{
+      is:{
+        args:["^[a-zA-ZÀ-ÿñÑ]+( [a-zA-ZÀ-ÿñÑ]+)*$"],
+        msg:"el nombre solo puede contener letras"
+    },
       notNull:{
-         msg:"el campo no puede estar vacio"
+         msg:"el campo nombre no puede estar vacio"
       },
-      isAlpha:{
+     /* isAlpha:{
          /* solo letras */
-         args: true,
+        /* args: true,
          msg:"el nombre solo puede contener letras"
-      },
+      },*/
       len:{
         args:[3,150],
         msg:"El nombre de contener 3 a 150 caracteres"

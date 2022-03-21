@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const usuarios = require('../models/index').usuarios
+const roles = require('../models/index').roles
 var generator = require('generate-password');
 
 
@@ -19,15 +20,35 @@ router.get('/', async (req, res) =>{
       res.status( 400 ).send( error )
     } )
 });
+ /* Muestra un usuarios por id GET con los roles*/
+ router.get('/:id/roles', async (req, res) =>{
+  const user = await usuarios.findAll({
+  include:{
+    association:"roles",
+    attributes:['id','rol']
+  },
+    where:{
+      id: req.params.id
+  }
+  })
 
+  .then( userResponse => {
+    res.status( 200 ).json( userResponse )
+  } )
+  .catch( error => {
+    res.status( 400 ).send( error )
+  } )
+});
+/********************************* */
    
 /**********************/
 
-router.post('/', (req, res)=>{
+router.post('/', async (req, res)=>{
  
   /*Verifica si existe Email para que no se repita*/  
   const testcuenta = req.body.cuenta;
   console.log('EMAMIL', testcuenta)
+
   const user= usuarios.count({where:{cuenta:testcuenta}})
     .then( user => {
       if (user > 0){
@@ -36,7 +57,7 @@ router.post('/', (req, res)=>{
       }else{
   
   // ------------------
-   if(req.body.pass==""){
+   if(req.body.pass=="" || !req.body.pass){
       var passwords = generator.generate({
         length: 8,
         uppercase: true,
@@ -46,44 +67,66 @@ router.post('/', (req, res)=>{
     }
 //-------------------
 
-  usuarios.create(req.body)
+let rol = roles.findByPk(req.body.rol_id)
+ .then(rol=>{
+
+if(!rol){
+  res.status( 500 ).json('Verifique Rol');
+}else{
   
-  .then((data)=>{
-      res.json({datos:data})
-  })
- .catch((err)=>{
-      res.json({error:err})
-     
+ usuarios.create(req.body)
+ 
+ .then(use=>{
+  res.status( 200 ).json(use)
+ }).catch(err=>{
+   res.status(500).json(err.message)
  })
 }
-}) 
+  
 })
+
+
+}
+})
+
+})
+
+
 
 /**PUT Usuario */
 router.put('/:id',async(req,res)=>{
-  console.log(req.params.id)
-  await usuarios.update({
-     cuenta:req.body.cuenta,
-     nombre:req.body.nombre,
-     pass:req.body.pass,
-     rol_id:req.body.rol_id
-      },{
-        where:{
-          id: req.params.id
+  const user = await usuarios.findByPk(req.params.id)
+  if(!user){
+    res.status( 500 ).json('Usuario inexistente');
+  }else{
+    try {
+         await usuarios.update({
+          cuenta:req.body.cuenta,
+          nombre:req.body.nombre,
+          pass:req.body.pass,
+          rol_id:req.body.rol_id
+            },{
+              where:{
+                id: req.params.id
         }
     })
-    .then( result => {
-      res.status( 200 ).json('Usuario Actualizado' )
-    } )
-    .catch( error => {
-      res.status( 400 ).send( error )
-    } )
+    res.status( 200 ).json('Usuario Actualizado' )
+  }
   
+
+catch (e){
+  res.status(500).send({ message: 'Se produjo un error al actualizar el Usuario', exception: e})
+    }
+  }
 });
 
 /********************************/   
 /********************************/      
 router.delete('/:id',async(req,res)=>{
+  const user = await usuarios.findByPk(req.params.id)
+  if(!user){
+    res.status( 500 ).json('Usuario inexistente');
+  }else{
   await usuarios.destroy({
     where:{
         id:req.params.id
@@ -95,6 +138,7 @@ router.delete('/:id',async(req,res)=>{
     .catch( error => {
       res.status( 400 ).send( error )
     } )
+  }
 });
   
 
