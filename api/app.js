@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 var usuario = require('./routes/usuarios');
 var roles = require('./routes/roles');
 var politicas = require('./routes/politicas');
+var login = require('./routes/auth');
 
 var app = express();
 /*sequelize.sync()
@@ -33,5 +34,6 @@ app.use('/users', usersRouter);
 app.use('/usuarios', usuario);
 app.use('/roles', roles);
 app.use('/politicas',politicas);
+app.use('/auth', login);
 
 module.exports = app;

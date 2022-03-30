@@ -20,6 +20,7 @@ router.get('/', async (req, res) =>{
       res.status( 400 ).send( error )
     } )
 });
+
  /* Muestra un usuarios por id GET con los roles*/
  router.get('/:id/roles', async (req, res) =>{
   const user = await usuarios.findAll({
@@ -141,6 +142,8 @@ router.delete('/:id',async(req,res)=>{
   }
 });
   
+
+
 
 module.exports = router;
 
