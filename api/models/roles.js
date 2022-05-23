@@ -31,10 +31,10 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     
-    rol:{
+    nombre:{
       type: DataTypes.STRING,
       allowNull: false,
-      /*Unique: true*/
+     /* Unique: true*/
     },
    
   }, {

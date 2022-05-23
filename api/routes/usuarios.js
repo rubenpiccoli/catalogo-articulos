@@ -4,57 +4,59 @@ const usuarios = require('../models/index').usuarios
 const roles = require('../models/index').roles
 var generator = require('generate-password');
 
+const authroutes =require ('../mideware/authroutes');
 
-router.get('/', async (req, res) =>{
-     await usuarios.findAll({
+
+router.get('/',authroutes.verifyToken, authroutes.VerifyAuthroutes, async (req, res) =>{
+  try{  
+  const user=await usuarios.findAll({
        include:{
          association:"roles",
-         attributes:['id','rol']
-
-       }
+         attributes:['id','nombre']
+         }
      })
-    .then( userResponse => {
-      res.status( 200 ).json( userResponse )
-    } )
-    .catch( error => {
-      res.status( 400 ).send( error )
-    } )
+    
+      res.status( 200 ).json( user )
+    
+  }catch (e) {
+      res.status(400).send({ message: 'Se produjo un error querer mostrar usuario y rol', exception: e})
+    }
 });
 
  /* Muestra un usuarios por id GET con los roles*/
  router.get('/:id/roles', async (req, res) =>{
+
+  try{
   const user = await usuarios.findAll({
   include:{
     association:"roles",
-    attributes:['id','rol']
+    attributes:['id','nombre']
   },
     where:{
       id: req.params.id
   }
   })
-
-  .then( userResponse => {
-    res.status( 200 ).json( userResponse )
-  } )
-  .catch( error => {
-    res.status( 400 ).send( error )
-  } )
+  res.status( 200 ).json( user )
+ } catch (e) {
+    res.status(400).send({ message: 'Se produjo un error querer mostrar usuario y rol', exception: e})
+  }
+  
 });
 /********************************* */
    
 /**********************/
 
 router.post('/', async (req, res)=>{
- 
+ try{
   /*Verifica si existe Email para que no se repita*/  
   const testcuenta = req.body.cuenta;
   console.log('EMAMIL', testcuenta)
 
-  const user= usuarios.count({where:{cuenta:testcuenta}})
-    .then( user => {
-      if (user > 0){
-      res.json('usuarios exitente');
-      return
+  const user= await usuarios.count({where:{cuenta:testcuenta}})
+    
+      if (user){
+      res.json('Usuarios existente');
+      
       }else{
   
   // ------------------
@@ -65,37 +67,30 @@ router.post('/', async (req, res)=>{
         numbers:true,
       });
    req.body.pass= passwords;
-    }
+    };
 //-------------------
 
-let rol = roles.findByPk(req.body.rol_id)
- .then(rol=>{
+let rol = await roles.findByPk(req.body.rol_id);
+ 
 
 if(!rol){
-  res.status( 500 ).json('Verifique Rol');
+  res.status( 200 ).json('Verifique Rol');
 }else{
   
- usuarios.create(req.body)
- 
- .then(use=>{
-  res.status( 200 ).json(use)
- }).catch(err=>{
-   res.status(500).json(err.message)
- })
+ const user=await usuarios.create(req.body)
+ res.status( 200 ).json('Usuario Creado')
 }
+}
+
+}catch (e) {
+  res.status(400).send({ message: 'Se produjo un error querer crear usuario', exception: e})
+}
+});
+
   
-})
-
-
-}
-})
-
-})
-
-
 
 /**PUT Usuario */
-router.put('/:id',async(req,res)=>{
+router.put('/:id',authroutes.verifyToken, authroutes.VerifyAuthroutes,async(req,res)=>{
   const user = await usuarios.findByPk(req.params.id)
   if(!user){
     res.status( 500 ).json('Usuario inexistente');
@@ -123,23 +118,25 @@ catch (e){
 
 /********************************/   
 /********************************/      
-router.delete('/:id',async(req,res)=>{
+router.delete('/:id',authroutes.verifyToken, authroutes.VerifyAuthroutes,async(req,res)=>{
   const user = await usuarios.findByPk(req.params.id)
   if(!user){
     res.status( 500 ).json('Usuario inexistente');
   }else{
+    try {
   await usuarios.destroy({
     where:{
         id:req.params.id
     }
   })
-    .then( result => {
-      res.status( 200 ).json('Usuario Eliminado con exito' )
-    } )
-    .catch( error => {
-      res.status( 400 ).send( error )
-    } )
+  res.status( 200 ).json('Usuario Eliminado' )
   }
+  catch(e){
+    res.status(500).send({ message: 'Se produjo un error al borrar el Usuario', exception: e})
+      }
+  }
+   
+      
 });
   
 
