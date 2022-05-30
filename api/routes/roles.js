@@ -1,19 +1,25 @@
 const express = require('express');
+
 const usuarios = require('../models/usuarios');
 const router = express.Router();
 const politicas = require('../models/index').politicas;
 const roles_politicas = require('../models/index').roles_politicas;
 const roles = require('../models/index').roles;
-
+const authroutes =require ('../mideware/authroutes');
 
 /* Muestra todos los roles GET */
-router.get('/', async (req, res) =>{
+router.get('/',authroutes.verifyToken, authroutes.VerifyAuthroutes, async (req, res) =>{
   try{
-    const rol = await roles.findAll({attributes:['id','nombre']})
+    const rol = await roles.findAll({
+      include:{
+        association:"politicas",
+        attributes:['id','politicas']
+      },
+      attributes:['id','nombre']})
     if (rol.length==0){
-    res.status(200).send({ message: 'no se encontraron roles'})
+    res.status(400).send({ message: 'no se encontraron roles'})
     }else{
-    res.status( 200 ).json( rol )
+    res.status(200).json( rol )
     }
   }catch(e){
     res.status(400).send({ message: 'error', exception: e})
@@ -23,16 +29,21 @@ router.get('/', async (req, res) =>{
  
   
   /** Nuevo Rol POST */
-  router.post('/', async (req, res)=>{
+  router.post('/' ,authroutes.verifyToken, authroutes.VerifyAuthroutes, async (req, res)=>{
        
  // 1. INSERT a new rol
  try {
   if (!req.body.nombre || req.body.nombre=="" || !req.body.politicas || req.body.politicas=="")
-    res.status(400).send({ message: 'Debe indicar el campo [nombre] con sus politicas en el body ' })
+    res.status(200).send({ message: 'Debe indicar el campo [nombre] con sus politicas en el body' })
   else {
+    const rol1 = await roles.findAll({where: {nombre: req.body.nombre}})
+    if(!rol1.length==0){
+      res.status(200).send({ message: 'Rol existente'})
+     }else{   
     const rol = await roles.create({
       nombre: req.body.nombre,
-    });
+    })
+  
     for (const p of req.body.politicas) {
       let politica = await politicas.findByPk(p);
        if(!politica) {    
@@ -43,9 +54,9 @@ router.get('/', async (req, res) =>{
        
        }
     }
-    res.status(200).json(rol);
+    res.status(200).send({ message: 'Rol Creado'})
   }
-
+}
 } catch (e) {
   res.status(500).send({ message: 'Se produjo un error al guardar el rol', exception: e})
 }
@@ -54,17 +65,17 @@ router.get('/', async (req, res) =>{
 
 /**************************************************************************************** */
   /*Modifica Rol PUT*/
-  router.put('/:id', async (req,res)=>{
+  router.put('/:id', authroutes.verifyToken, authroutes.VerifyAuthroutes, async (req,res)=>{
     
     try {
       const role = await roles.findByPk(req.params.id)
      
-      if(!role){
-        res.status( 200 ).json('Rol inexistente'); 
+      if(role.length==0){
+        res.status(200).send({ message: 'Rol inexistente'})
       }else{
       
         if (!req.body.nombre){
-        res.status(400).send({ message: 'Debe indicar el campo [nombre] en el body ' })
+        res.status(400).send({ message: 'Debe indicar el campo [nombre] no puede esta vacio' })
          } else {
   
                   await roles.update({ nombre:req.body.nombre},
@@ -75,22 +86,17 @@ router.get('/', async (req, res) =>{
     }
       const role = await roles.findByPk(req.params.id)
         /* sino se envia policas muestra el rol modificado*/
-      if(!req.body.politicas){
-        res.status(200).json(role);
+     if(!req.body.politicas){
+         
+        res.status(200).send({ message: 'Rol actualizado'})
     
     }else {
   
          /* si se recibe politicas nuevas o las mismas las actuliza */
           let  politica = await politicas.findAll({where: {id: req.body.politicas}})
-          
-          //.then(resultado=>{
-          if(politica.length==0 ){
-              /*si se envia vacio o no se envia*/
-          }else{
-            /*elimina y actualiza las politicas */
             role.setPoliticas(politica);
-        }
-        res.status(200).json(role);
+         
+        res.status(200).send({ message: 'Rol actualizado'});
       }
       }
 
@@ -107,7 +113,7 @@ router.get('/', async (req, res) =>{
 
 
   /* Elimina  Rol*/
-  router.delete('/:id',async(req,res)=>{
+  router.delete('/:id', authroutes.verifyToken, authroutes.VerifyAuthroutes, async(req,res)=>{
     try{
     const role = await roles.findByPk(req.params.id)
     if(!role){
